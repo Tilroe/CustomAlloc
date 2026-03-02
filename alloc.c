@@ -8,7 +8,6 @@
 
 #include <string.h>
 
-//
 #define MEMORY_SIZE 1024
 #define METADATA_SIZE (sizeof(size_t) + 1) // block size + 1 byte for FREE/ALLOCATED
 
@@ -65,11 +64,11 @@ char* write_metadata(char* ptr, struct block_metadata metadata) {
 // ----- Function definitions -----
 
 char* alloc_custom(const size_t size) {
-    if (!initialized) init_custom();
+    if (!initialized) init_custom(); // Lazy initialization
     struct block_metadata metadata;
-    char *md_p = memory; // Metadata pointer
 
     // Searching consecutive metadata to find one that's free and big enough
+    char *md_p = memory;
     while (
             (md_p = read_metadata(md_p, &metadata)) &&
             (metadata.block_type == ALLOCATED || metadata.block_type == FREE && metadata.block_size < size)
@@ -85,8 +84,8 @@ char* alloc_custom(const size_t size) {
     return md_p + METADATA_SIZE;
 }
 
-// Undefined behaviour if freeing ptr not right after metadata (i.e. pointer not given back by alloc_custom)
 void free_custom(void* ptr) {
+    // Undefined behaviour if not freeing pointer given by allocator function
     if (!initialized) init_custom(); // Lazy initialization
     struct block_metadata metadata, next_metadata;
 
